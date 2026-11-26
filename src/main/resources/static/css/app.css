@@ -117,3 +117,6 @@ thead { background: var(--canvas); }
 td .actions { flex-wrap: nowrap; }
 .image-url { min-width: 10rem; max-width: 20rem; overflow-wrap: anywhere; }
 .pagination { margin-top: var(--space-4); }
+.page-size { margin-top: var(--space-4); }
+.page-size select { width: auto; }
+.current-page { cursor: default; }

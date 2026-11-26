@@ -1,35 +1,64 @@
 package vn.edu.hcmute.bt5.category;
 
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
+import java.util.List;
+import java.util.stream.IntStream;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
-import vn.edu.hcmute.bt5.web.AdminList;
 
 @Controller
 @RequestMapping("/admin/categories")
 class AdminCategoryController {
     private static final String PATH = "/admin/categories";
     private static final String LIST = "redirect:" + PATH;
-    private final CategoryRepository categories;
+    private static final String SEARCH = PATH + "/searchpaginated";
+    private static final List<Integer> PAGE_SIZES = List.of(3, 5, 10, 15, 20);
+    private static final Sort SORT = Sort.by("name", "id");
+    private final CategoryService categoryService;
 
-    AdminCategoryController(CategoryRepository categories) {
-        this.categories = categories;
+    AdminCategoryController(CategoryService categoryService) {
+        this.categoryService = categoryService;
     }
 
-    @GetMapping
-    String list(@RequestParam(defaultValue = "") String q, @RequestParam(defaultValue = "1") int page,
-                Model model, RedirectAttributes redirect) {
-        return AdminList.render(q, page, PATH, "admin/categories", categories::findByNameContainingIgnoreCase,
-                model, redirect);
+    @GetMapping({"", "/searchpaginated"})
+    String search(@RequestParam(required = false) String name,
+                  @RequestParam(defaultValue = "") String q,
+                  @RequestParam(defaultValue = "1") int page,
+                  @RequestParam(defaultValue = "3") int size,
+                  Model model, RedirectAttributes redirect) {
+        String keyword = (name == null ? q : name).strip();
+        keyword = keyword.substring(0, Math.min(keyword.length(), 100));
+        int pageSize = PAGE_SIZES.contains(size) ? size : PAGE_SIZES.getFirst();
+        int index = Math.clamp((long) page - 1, 0, Integer.MAX_VALUE / pageSize);
+        var pageable = PageRequest.of(index, pageSize, SORT);
+        Page<Category> resultPage = keyword.isEmpty() ? categoryService.findAll(pageable)
+                : categoryService.findByNameContaining(keyword, pageable);
+        int lastPage = Math.max(1, resultPage.getTotalPages());
+        int currentPage = Math.clamp(page, 1, lastPage);
+        if (currentPage != page || pageSize != size) {
+            redirect.addAttribute("name", keyword);
+            redirect.addAttribute("size", pageSize);
+            redirect.addAttribute("page", currentPage);
+            return "redirect:" + SEARCH;
+        }
+
+        int start = Math.max(1, Math.min(currentPage - 2, lastPage - 4));
+        int end = Math.min(lastPage, start + 4);
+        model.addAttribute("name", keyword);
+        model.addAttribute("categoryPage", resultPage);
+        model.addAttribute("pageNumbers", IntStream.rangeClosed(start, end).boxed().toList());
+        model.addAttribute("pageSizes", PAGE_SIZES);
+        model.addAttribute("searchPath", SEARCH);
+        return "admin/category/list";
     }
 
-    @GetMapping("/new")
+    @GetMapping({"/new", "/add"})
     String newCategory(Model model) {
         model.addAttribute("categoryForm", new CategoryForm("", "", true));
         return form(model, null);
@@ -41,9 +70,9 @@ class AdminCategoryController {
         return save(new Category(), categoryForm, errors, model, redirect);
     }
 
-    @GetMapping("/{id}/edit")
+    @GetMapping({"/{id}/edit", "/edit/{id}"})
     String edit(@PathVariable long id, Model model) {
-        Category category = find(id);
+        Category category = categoryService.find(id);
         model.addAttribute("categoryForm",
                 new CategoryForm(category.getName(), category.getImageUrl(), category.isActive()));
         return form(model, category.getId());
@@ -52,12 +81,12 @@ class AdminCategoryController {
     @PostMapping("/{id}")
     String update(@PathVariable long id, @Valid @ModelAttribute CategoryForm categoryForm,
                   BindingResult errors, Model model, RedirectAttributes redirect) {
-        return save(find(id), categoryForm, errors, model, redirect);
+        return save(categoryService.find(id), categoryForm, errors, model, redirect);
     }
 
-    @GetMapping("/{id}/delete")
+    @GetMapping({"/{id}/delete", "/delete/{id}"})
     String confirmDelete(@PathVariable long id, Model model) {
-        Category category = find(id);
+        Category category = categoryService.find(id);
         model.addAttribute("itemName", category.getName());
         model.addAttribute("deletePath", PATH + "/" + id + "/delete");
         model.addAttribute("listPath", PATH);
@@ -66,13 +95,9 @@ class AdminCategoryController {
 
     @PostMapping("/{id}/delete")
     String delete(@PathVariable long id, RedirectAttributes redirect) {
-        categories.delete(find(id));
+        categoryService.delete(categoryService.find(id));
         redirect.addFlashAttribute("notice", "Đã xóa danh mục.");
         return LIST;
-    }
-
-    private Category find(long id) {
-        return categories.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
     private String save(Category category, CategoryForm input, BindingResult errors,
@@ -82,7 +107,7 @@ class AdminCategoryController {
         }
         boolean adding = category.getId() == null;
         category.update(input);
-        categories.save(category);
+        categoryService.save(category);
         redirect.addFlashAttribute("notice", adding ? "Đã thêm danh mục." : "Đã cập nhật danh mục.");
         return LIST;
     }

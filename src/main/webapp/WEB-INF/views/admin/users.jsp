@@ -2,7 +2,7 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <c:set var="pageTitle" value="Người dùng"/>
 <c:set var="searchLabel" value="Tìm theo email hoặc họ tên"/>
-<%@ include file="../shared/header.jspf" %>
+<%@ include file="../shared/view-start.jspf" %>
 <section class="panel">
     <div class="section-heading">
         <h1>Người dùng</h1>
@@ -42,4 +42,4 @@
     </c:choose>
     <%@ include file="../shared/pagination.jspf" %>
 </section>
-<%@ include file="../shared/footer.jspf" %>
+<%@ include file="../shared/view-end.jspf" %>

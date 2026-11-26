@@ -8,10 +8,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title><c:out value="${pageTitle}"/> · LTWeb BT5</title>
+    <title><c:choose><c:when test="${not empty layout}"><sitemesh:write property="title" /></c:when><c:otherwise><c:out value="${pageTitle}"/></c:otherwise></c:choose> · LTWeb BT5</title>
     <link rel="stylesheet" href="<c:url value='/css/app.css'/>">
 </head>
-<body>
+<body data-layout="<c:out value='${layout}'/>">
 <a class="skip-link" href="#main">Đến nội dung</a>
 <header class="site-header">
     <nav class="shell nav" aria-label="Điều hướng chính">

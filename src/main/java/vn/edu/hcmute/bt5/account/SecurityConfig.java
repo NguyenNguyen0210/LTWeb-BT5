@@ -20,6 +20,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import static jakarta.servlet.DispatcherType.ERROR;
 import static jakarta.servlet.DispatcherType.FORWARD;
+import static jakarta.servlet.DispatcherType.INCLUDE;
 
 @Configuration
 class SecurityConfig {
@@ -32,7 +33,7 @@ class SecurityConfig {
     SecurityFilterChain security(HttpSecurity http, Accounts accounts) {
         return http
                 .authorizeHttpRequests(auth -> auth
-                        .dispatcherTypeMatchers(FORWARD, ERROR).permitAll()
+                        .dispatcherTypeMatchers(FORWARD, INCLUDE, ERROR).permitAll()
                         .requestMatchers("/", "/login", "/register", "/css/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().denyAll())

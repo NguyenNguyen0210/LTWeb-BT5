@@ -52,6 +52,11 @@
             <groupId>jakarta.servlet.jsp.jstl</groupId>
             <artifactId>jakarta.servlet.jsp.jstl-api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.sitemesh</groupId>
+            <artifactId>sitemesh-webfilter</artifactId>
+            <version>3.3.0</version>
+        </dependency>
     </dependencies>
 
     <build>
