@@ -1,0 +1,25 @@
+<%@ page pageEncoding="UTF-8" %>
+<nav class="pagination" aria-label="Phân trang kết quả">
+    <span>
+        <c:out value="${results.totalElements}"/> kết quả
+        <c:if test="${results.totalPages gt 0}">
+            · Trang <c:out value="${results.number + 1}"/> / <c:out value="${results.totalPages}"/>
+        </c:if>
+    </span>
+    <div class="actions">
+        <c:if test="${results.number gt 0}">
+            <c:url var="previousUrl" value="${listPath}">
+                <c:param name="q" value="${keyword}"/>
+                <c:param name="page" value="${results.number}"/>
+            </c:url>
+            <a class="button quiet" href="<c:out value='${previousUrl}'/>">Trang trước</a>
+        </c:if>
+        <c:if test="${results.number + 1 lt results.totalPages}">
+            <c:url var="nextUrl" value="${listPath}">
+                <c:param name="q" value="${keyword}"/>
+                <c:param name="page" value="${results.number + 2}"/>
+            </c:url>
+            <a class="button quiet" href="<c:out value='${nextUrl}'/>">Trang sau</a>
+        </c:if>
+    </div>
+</nav>

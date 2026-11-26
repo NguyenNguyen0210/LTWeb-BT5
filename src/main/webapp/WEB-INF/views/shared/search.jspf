@@ -1,0 +1,10 @@
+<%@ page pageEncoding="UTF-8" %>
+<c:url var="listUrl" value="${listPath}"/>
+<form method="get" action="<c:out value='${listUrl}'/>" class="search" role="search">
+    <div class="field">
+        <label for="q"><c:out value="${searchLabel}"/></label>
+        <input type="search" id="q" name="q" maxlength="100" value="<c:out value='${keyword}'/>">
+    </div>
+    <button type="submit">Tìm kiếm</button>
+    <c:if test="${not empty keyword}"><a class="button quiet" href="<c:out value='${listUrl}'/>">Xóa bộ lọc</a></c:if>
+</form>

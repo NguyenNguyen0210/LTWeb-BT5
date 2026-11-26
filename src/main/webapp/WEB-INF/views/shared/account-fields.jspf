@@ -1,0 +1,29 @@
+<%@ page pageEncoding="UTF-8" %>
+<div class="field">
+    <label for="fullName">Họ và tên</label>
+    <form:input path="fullName" id="fullName" required="required" maxlength="100" autocomplete="name"
+                aria-describedby="fullName-error"/>
+    <form:errors path="fullName" cssClass="field-error" id="fullName-error"/>
+</div>
+<div class="field">
+    <label for="email">Email</label>
+    <form:input path="email" id="email" type="email" required="required" maxlength="100" autocomplete="username"
+                aria-describedby="email-error"/>
+    <form:errors path="email" cssClass="field-error" id="email-error"/>
+</div>
+<div class="field">
+    <label for="password">Mật khẩu</label>
+    <c:choose>
+        <c:when test="${editing}">
+            <form:password path="password" id="password" minlength="8" maxlength="128" autocomplete="new-password"
+                           aria-describedby="password-hint password-error"/>
+            <small id="password-hint">Để trống nếu muốn giữ mật khẩu hiện tại.</small>
+        </c:when>
+        <c:otherwise>
+            <form:password path="password" id="password" required="required" minlength="8" maxlength="128"
+                           autocomplete="new-password" aria-describedby="password-hint password-error"/>
+            <small id="password-hint">Sử dụng ít nhất 8 ký tự.</small>
+        </c:otherwise>
+    </c:choose>
+    <form:errors path="password" cssClass="field-error" id="password-error"/>
+</div>
